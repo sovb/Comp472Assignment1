@@ -1,4 +1,3 @@
-
 from pandas.api.types import CategoricalDtype #added so we can order the BP and Cholesterol
 from sklearn.model_selection import train_test_split, GridSearchCV
 from sklearn.datasets import load_digits #from perceptron example
@@ -69,3 +68,63 @@ print('F1 score weighted: %f' % f12)
 mat = confusion_matrix(y_test, yhat_classes)
 print('Confusion Matrix: ')
 print (mat)
+
+accuracy = []
+macro_f1 = []
+weighted_f1 = []
+for i in range(10):
+
+
+
+    clf = [MLPClassifier()
+
+           ]
+    p_result = []
+    accuracy_temp = []
+    macro_temp = []
+    weighted_temp = []
+
+    # training and testing new models
+    for j in range(1):
+        # training
+        clf[j].fit(X, y)
+        # testing
+        p_result.append(clf[j].predict(X_test))
+
+    # recording scores
+    for k in range(1):
+        # accuracy
+        accuracy_temp.append(accuracy_score(y_test, p_result[k]))
+        accuracy.append(accuracy_temp)
+        # macro F1
+        macro_temp.append(f1_score(y_test, p_result[k], average='macro'))
+        macro_f1.append(macro_temp)
+        # weighted F1
+        weighted_temp.append(f1_score(y_test, p_result[k], average='weighted'))
+        weighted_f1.append(weighted_temp)
+
+# calculate the average and stddev
+accuracy = np.array(accuracy)
+macro_f1 = np.array(macro_f1)
+weighted_f1 = np.array(weighted_f1)
+
+mean_accuracy = np.mean(accuracy, axis=0)
+mean_macro_f1 = np.mean(macro_f1, axis=0)
+mean_weighted_f1 = np.mean(weighted_f1, axis=0)
+std_accuracy = np.std(accuracy, axis=0)
+std_macro_f1 = np.std(macro_f1, axis=0)
+std_weighted_f1 = np.std(weighted_f1, axis=0)
+
+columns = ["Base-MLP"]
+rows = ["mean_accuracy", "mean_macro_f1", "mean_weighted_f1", "std_accuracy", "std_macro_f1", "std_weighted_f1"]
+t10average = pd.DataFrame([mean_accuracy,
+                     mean_macro_f1,
+                     mean_weighted_f1,
+                     std_accuracy,
+                     std_macro_f1,
+                     std_weighted_f1],
+                    rows)
+print('\n')
+print('\nTen times average\n')
+print('\n')
+print((t10average, columns))

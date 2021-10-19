@@ -1,0 +1,71 @@
+
+from pandas.api.types import CategoricalDtype #added so we can order the BP and Cholesterol
+from sklearn.model_selection import train_test_split, GridSearchCV
+from sklearn.datasets import load_digits #from perceptron example
+from sklearn.linear_model import Perceptron
+from sklearn.metrics import precision_score, recall_score, accuracy_score, confusion_matrix, f1_score
+from sklearn.neural_network import MLPClassifier
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import webbrowser
+%matplotlib inline
+
+drug_doc=pd.read_csv("Downloads\drug200.csv", index_col=0)
+#print(drug_doc)
+drug_doc.info()
+drug_cat=drug_doc['Drug'].value_counts(ascending=True)
+#print(drug_cat)
+plt.plot(drug_cat)
+plt.savefig('Downloads\drug-distribution.pdf')
+plt.show()
+drug_doc=pd.get_dummies(drug_doc, columns=['Sex'], drop_first=True) #we do this to minimize number of columns
+
+
+#add ordinal (categorical here)
+cleanup_nums = {"BP":     {"HIGH": 3, "NORMAL": 2, "LOW": 1},
+                "Cholesterol": {"HIGH": 3, "NORMAL": 2 }}
+CategoricalDtype(categories=["BP", "Cholesterol"], ordered=True)
+drug_doc = drug_doc.replace(cleanup_nums)
+#print(drug_doc)
+#train_test_split
+y = drug_doc.Drug
+X = drug_doc.drop('Drug', axis=1)
+X_train, X_test, y_train, y_test = train_test_split(X, y) #does this set it to default??????
+print("\nX_train:\n")
+print(X_train.head())
+print(X_train.shape)
+
+print("\nX_test:\n")
+print(X_test.head())
+print(X_test.shape)
+
+
+#Base MLP
+classifier=MLPClassifier( hidden_layer_sizes=(100,), solver='sgd', activation='logistic').fit(X_train, y_train)
+classifier.fit(X_train, y_train)
+
+
+# predict probabilities for test set
+yhat_probs = classifier.predict(X_test)
+# predict crisp classes for test set
+yhat_classes = classifier.predict(X_test)#instead of predict_classses
+
+# accuracy: (tp + tn) / (p + n)
+accuracy = accuracy_score(y_test, yhat_classes)
+print('Accuracy: %f' % accuracy)
+# precision tp / (tp + fp)
+precision = precision_score(y_test, yhat_classes, average='weighted')
+print('Precision: %f' % precision)
+# recall: tp / (tp + fn)
+recall = recall_score(y_test, yhat_classes, average='weighted')
+print('Recall: %f' % recall)
+# f1: 2 tp / (2 tp + fp + fn)
+f11 = f1_score(y_test, yhat_classes, average='macro')
+print('F1 score macro: %f' % f11)
+# f1: 2 tp / (2 tp + fp + fn)
+f12 = f1_score(y_test, yhat_classes, average='weighted')
+print('F1 score weighted: %f' % f12)
+mat = confusion_matrix(y_test, yhat_classes)
+print('Confusion Matrix: ')
+print (mat)

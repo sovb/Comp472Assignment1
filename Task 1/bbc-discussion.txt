@@ -1,0 +1,3 @@
+(a) This dataset is almost balanced so we can use accuracy here to measure the performance. Incase if this was completely unbalanced, we would could have used precision and recall depending on what we want to predict at the end. We can also include AUC to measure the performance for imbalanced dataset.
+
+(b) The performance steps are the same because we only adjusted the hyperparameter "alpha", which is the smoothing value.

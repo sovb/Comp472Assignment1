@@ -1,0 +1,74 @@
+
+def scoreThisCell(game, x, y, n, s):
+        currentSymbol = game.player_turn 
+        otherSymbol = None 
+        if currentSymbol == 'X':
+                otherSymbol = 'O'
+        else:
+                otherSymbol = 'X'
+        score = 0
+        numCurrentSymbols = 0           #rein
+        numOtherSymbols = 0
+        
+        for col in range(0,n):
+                if game[x][n] is currentSymbol:         #x checks for rows
+                        numCurrentSymbols += 1
+                if game[x][n] is otherSymbol:
+                        numOtherSymbols += 1
+        
+
+        score = score + pow(2, numCurrentSymbols) - pow(2, numOtherSymbols)     
+        print("score with row is : ", score)
+
+        
+        numCurrentSymbols = 0
+        numOtherSymbols = 0
+        
+        for row in range(0,n):
+                if game[n][y] is currentSymbol:                 #y checks for columns associated w the cell
+                        numCurrentSymbols += 1
+                if game[n][y] is otherSymbol:
+                        numOtherSymbols += 1
+        
+
+        score = score + pow(2, numCurrentSymbols) - pow(2, numOtherSymbols)
+        print("score with added column is : ", score)
+
+        numCurrentSymbols = 0           #rein
+        numOtherSymbols = 0
+
+        #top right to bottom left diagonal
+        step = min((n-x), (n-y)) -1
+        xval = x+step
+        yval = y+step
+        while xval >= 0 and yval >= 0 :
+                if game[xval][yval] is currentSymbol:
+                        numCurrentSymbols += 1
+                if game[xval][yval] is otherSymbol:
+                        numOtherSymbols += 1
+                xval += 1
+                yval += 1
+        
+
+        score = score + pow(2, numCurrentSymbols) - pow(2, numOtherSymbols)
+        print("score with added diagonal 2 is (total score for this cell): ", score)
+
+        #top left to bottom right diagonal
+        step = abs(x-y)         #take abs value
+        xval = x-step
+        yval = y-step
+        while xval < n and yval < n :
+                if game[xval][yval] is currentSymbol:
+                        numCurrentSymbols += 1
+                if game[xval][yval] is otherSymbol:
+                        numOtherSymbols += 1
+                xval += 1
+                yval += 1
+        #
+
+        score = score + pow(2, numCurrentSymbols) - pow(2, numOtherSymbols)
+        print("score with added diagonal 1 is : ", score)
+
+        numCurrentSymbols = 0           #rein
+        numOtherSymbols = 0
+        

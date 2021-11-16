@@ -1,0 +1,84 @@
+def scoreThisCell(game, x, y, n, s):    
+        currentSymbol = game.player_turn 
+        otherSymbol = None 
+        if currentSymbol == 'X':
+                otherSymbol = 'O'
+        else:
+                otherSymbol = 'X'
+        score = 0
+        numCurrentSymbols = 0
+        numOtherSymbols = 0
+        
+        rstreak = 0
+        for col in range(0,n):
+                if game[x][n] == currentSymbol or game[x][n] == '.':            #x for rows
+                        rstreak+=1
+                        if game[x][n] == currentSymbol:
+                                numCurrentSymbols += 1
+                else:
+                        rstreak = 0
+                        if game[x][n] == otherSymbol:
+                                numOtherSymbols += 1
+        if rstreak >= s:               #if we might have a win here, show score
+                score = score + pow(2, numCurrentSymbols) - pow(2, numOtherSymbols)
+                print("score with row is : ", score)
+        cstreak = 0
+        numCurrentSymbols = 0
+        numOtherSymbols = 0
+        for row in range(0,n):
+                if game[n][y] == currentSymbol or game[n][y] == '.':            #y is columns
+                        cstreak += 1
+                        if game[n][y] == currentSymbol:
+                                numCurrentSymbols += 1
+                else:
+                        cstreak = 0
+                        if game[n][y] == otherSymbol:
+                                numOtherSymbols += 1
+        if cstreak >= s:                
+                score = score + pow(2, numCurrentSymbols) - pow(2, numOtherSymbols)     # #if we might have a win here, get the score
+                print("score with added column is : ", score)
+
+
+        trbl = 0 #topright to bottomleft diagonal
+        numCurrentSymbols = 0
+        numOtherSymbols = 0
+        step = min((n-x), (n-y)) -1             
+        xval = x+step
+        yval = y+step
+        while xval >= 0 and yval >= 0 :                 #check
+                if game[xval][yval] == currentSymbol or game[xval][yval] == '.':
+                        trbl += 1
+                        if game[xval][yval] == currentSymbol:
+                                numCurrentSymbols += 1
+                else:
+                        trbl = 0
+                        if game[xval][yval] == otherSymbol:
+                                numOtherSymbols += 1
+                xval += 1
+                yval += 1
+        if trbl >= s:           #might have a winner
+                score = score + pow(2, numCurrentSymbols) - pow(2, numOtherSymbols)
+                print("score with added diagonal 2 is (total score for this cell): ", score)
+
+        tlbr = 0 # topleft to bottomright diagonal
+        numCurrentSymbols = 0
+        numOtherSymbols = 0
+        step = abs(x-y)         
+        xval = x-step
+        yval = y-step
+        while xval < n and yval < n :           #check
+                if game[xval][yval] == currentSymbol or game[xval][yval] == '.':
+                        tlbr += 1
+                        if game[xval][yval] == currentSymbol:
+                                numCurrentSymbols += 1
+                else:
+                        tlbr = 0
+                        if game[xval][yval] == otherSymbol:
+                                numOtherSymbols += 1
+                xval += 1
+                yval += 1
+        if tlbr >= s:           #might have a winner
+                score = score + pow(2, numCurrentSymbols) - pow(2, numOtherSymbols)
+                print("score with added diagonal 1 is : ", score)
+
+        

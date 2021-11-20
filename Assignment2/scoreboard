@@ -1,0 +1,104 @@
+n=4 b=4 s=3 t=5
+Player 1: d=6 a=False
+Player 2: d=6 a=False
+10 games
+Total wins for heuristic e1: 0 (0.0%) (Simple)
+Total wins for heuristic e2: 0 (0.0%) (Complex)
+i	Average evaluation time: nans
+ii	Total heuristic evaluations: 0.0
+iii	Evaluations by depth: {}
+iv	Average evaluation depth: 0.0
+v	Average recursion depth: 0.0
+vi	Average moves per game: 0.0
+
+n=4 b=4 s=3 t=1
+Player 1: d=6 a=True
+Player 2: d=6 a=True
+10 games
+Total wins for heuristic e1: 5 (50.0%) (Simple)
+Total wins for heuristic e2: 5 (50.0%) (Complex)
+i	Average evaluation time: 0.085s
+ii	Total heuristic evaluations: 39820.0
+iii	Evaluations by depth: {5: 1644.0, 4: 2076.0, 2: 2250.5, 0: 2261.0, 3: 4265.3, 1: 4363.2}
+iv	Average evaluation depth: 2.512
+v	Average recursion depth: 1.256
+vi	Average moves per game: 36.0
+
+n=5 b=4 s=4 t=1
+Player 1: d=2 a=True
+Player 2: d=6 a=True
+10 games
+Total wins for heuristic e1: 0 (0.0%) (Simple)
+Total wins for heuristic e2: 0 (0.0%) (Complex)
+i	Average evaluation time: 0.0s
+ii	Total heuristic evaluations: 4609.0
+iii	Evaluations by depth: {1: 0.1, 0: 2.1}
+iv	Average evaluation depth: 0.5
+v	Average recursion depth: 0.25
+vi	Average moves per game: 1.0
+
+n=5 b=4 s=4 t=5
+Player 1: d=6 a=True
+Player 2: d=6 a=True
+10 games
+Total wins for heuristic e1: 0 (0.0%) (Simple)
+Total wins for heuristic e2: 5 (50.0%) (Complex)
+i	Average evaluation time: 0.297s
+ii	Total heuristic evaluations: 504377.5
+iii	Evaluations by depth: {5: 18386.0, 4: 22223.0, 2: 23443.0, 0: 23702.0, 3: 59599.9, 1: 60677.3}
+iv	Average evaluation depth: 2.504
+v	Average recursion depth: 1.252
+vi	Average moves per game: 112.5
+
+n=8 b=5 s=5 t=1
+Player 1: d=2 a=True
+Player 2: d=6 a=True
+10 games
+Total wins for heuristic e1: 0 (0.0%) (Simple)
+Total wins for heuristic e2: 0 (0.0%) (Complex)
+i	Average evaluation time: 0.0s
+ii	Total heuristic evaluations: 2923.0
+iii	Evaluations by depth: {1: 0.1, 0: 5.9}
+iv	Average evaluation depth: 0.5
+v	Average recursion depth: 0.25
+vi	Average moves per game: 1.0
+
+n=8 b=5 s=5 t=5
+Player 1: d=2 a=True
+Player 2: d=6 a=True
+10 games
+Total wins for heuristic e1: 0 (0.0%) (Simple)
+Total wins for heuristic e2: 0 (0.0%) (Complex)
+i	Average evaluation time: 0.016s
+ii	Total heuristic evaluations: 17999.0
+iii	Evaluations by depth: {1: 0.1, 0: 5.9}
+iv	Average evaluation depth: 0.5
+v	Average recursion depth: 0.25
+vi	Average moves per game: 1.0
+
+n=8 b=6 s=5 t=1
+Player 1: d=6 a=True
+Player 2: d=6 a=True
+10 games
+Total wins for heuristic e1: 0 (0.0%) (Simple)
+Total wins for heuristic e2: 0 (0.0%) (Complex)
+i	Average evaluation time: nans
+ii	Total heuristic evaluations: 11292.0
+iii	Evaluations by depth: {}
+iv	Average evaluation depth: 0.0
+v	Average recursion depth: 0.0
+vi	Average moves per game: 0.0
+
+n=8 b=6 s=5 t=5
+Player 1: d=6 a=True
+Player 2: d=6 a=True
+10 games
+Total wins for heuristic e1: 0 (0.0%) (Simple)
+Total wins for heuristic e2: 0 (0.0%) (Complex)
+i	Average evaluation time: nans
+ii	Total heuristic evaluations: 78123.0
+iii	Evaluations by depth: {}
+iv	Average evaluation depth: 0.0
+v	Average recursion depth: 0.0
+vi	Average moves per game: 0.0
+

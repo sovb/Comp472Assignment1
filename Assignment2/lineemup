@@ -1,0 +1,680 @@
+# based on code from https://stackabuse.com/minimax-and-alpha-beta-pruning-in-python
+# Mateen, Sovra, Gursimranjot
+
+import random
+import numpy as np
+import time
+
+
+class Game:
+    MINIMAX = 0
+    ALPHABETA = 1
+    HUMAN = 2
+    AI = 3
+    E1 = 4
+    E2 = 5
+
+    def __init__(self, n=3, b=0, bboard=[], s=3, d1=0, d2=0, t=0.0):
+        self.n = n  # board size
+        self.b = b  # number of blocks
+        self.bboard = bboard  # position of the blocks, b coordinates
+        self.s = s  # winning size
+        self.d1 = d1  # Max depth adversial search value
+        self.d2 = d2  # Max depth adversial search value
+        self.t = t  # Max value of time t
+        self.initialize_game()
+
+        self.winner = 'None'
+        self.TimeUp = False  # in case we go over the time
+        self.current1 = 0  # current state of d1
+        self.current2 = 0  # current state of d2
+        self.currentTime = 0.0
+        self.minimaxStart = 0.0
+        self.alphaBetaStart = 0.0
+        self.e1count = 0
+        self.e2count = 0
+        self.numberOfMoves = 0  # maybe change this name
+        # and these below
+        self.heuTotal = 0
+        self.AVGStates = 0.0
+        self.depthD1 = {}
+        self.depthD2 = {}
+        self.bothDepth = {}
+        self.listOfTimes = []
+
+        self.file = open(F'gameTrace-{self.n}{self.b}{self.s}{self.t}.txt', 'w')
+        self.file.write(F'n={self.n} b={self.b} s={self.s} t={self.t}\n')
+        self.file.write(F'blocs={self.bboard}\n\n')
+
+    def initialize_game(self):
+        self.current_state = [['.' for x in range(self.n)] for y in range(self.n)]
+
+        if self.bboard == []:
+            for i in range(self.b):
+                X = random.randint(0, self.n - 1)
+                Y = random.randint(0, self.n - 1)
+                while self.current_state[X][Y] == '*':
+                    X = random.randint(0, self.n - 1)
+                    Y = random.randint(0, self.n - 1)
+                self.current_state[X][Y] = '*'
+                self.bboard.append([X, Y])
+        else:
+            for element in self.bboard:
+                self.current_state[element[0]][element[1]] = '*'
+
+        # Player X always plays first
+        self.player_turn = 'X'
+
+    def draw_board(self):
+        print()
+        self.file.write('\n\t')
+        for a in range(0, self.n):
+            self.file.write(F' {chr(a + 65)} ')  # 65 makes us start at A
+        self.file.write('\n')
+        for y in range(self.n):
+            self.file.write(F' {y} | ')
+            for x in range(self.n):
+                print(F'{self.current_state[x][y]}', end="")
+                self.file.write(F'{self.current_state[x][y]} ')
+            print()
+            self.file.write('\n')
+        print()
+        self.file.write('\n')
+
+    def is_valid(self, px, py):
+        if px not in range(self.n) or py not in range(self.n):
+            return False
+        elif self.current_state[px][py] != '.':
+            return False
+        else:
+            return True
+
+    def is_end(self):
+        # Vertical win
+        for i in range(0, self.n):  # for each column
+            # lineWin = 0 this was in Mateen's original
+            for j in range(0, (
+                                      self.n + 1) - self.s):  # recommendation (self.n + 1) - self.s to deal with index out of range
+                lineWinV = False  # moved inside by Sov
+                if self.current_state[i][j] == '.' or self.current_state[i][j] == '*':
+                    continue
+                for s in range(0,
+                               self.s - 1):  # loop through to check vertical line, check for 1 less than winning size
+                    if self.current_state[i][j + s] != self.current_state[i][j + s + 1]:  # checks for next in line
+                        lineWinV = True
+                        break  # leave the s loop if lineWinV is True
+                if lineWinV:
+                    continue
+                return self.current_state[i][j]  # vertical win with [i][j]
+
+        # Horizontal win
+        for j in range(self.n):  # for each row
+            for i in range(0, (self.n + 1) - self.s):
+                lineWinH = False
+                if self.current_state[i][j] == '.' or self.current_state[i][j] == '*':
+                    continue
+                for s in range(0, self.s - 1):
+                    if self.current_state[i + s][j] != self.current_state[i + s + 1][j]:
+                        lineWinH = True
+                        break  # break when lineWinH is true
+                if lineWinH:
+                    continue
+                return self.current_state[i][j]  # horizontal win with [i][j]
+
+        # Main diagonal win
+        # Takes into account off-diagonals (Top left to bottom right)
+        for i in range(0, (self.n + 1) - self.s):
+            for j in range(0, (self.n + 1) - self.s):
+                lineWinTLBR = False
+                if self.current_state[i][j] == '.' or self.current_state[i][i + j] == '*':
+                    continue
+                for s in range(0, self.s - 1):  # check for 1 less than the winning size
+                    if self.current_state[i + s][j + s] != self.current_state[i + s + 1][j + s + 1]:  # not equal to next element diagonally
+                        lineWinTLBR = True
+                        break  # break when lineWinTLBR is true
+                if lineWinTLBR:
+                    continue
+                return self.current_state[i][j]  # TLBR diagonal win with [i][j]
+
+        # Second diagonal win
+        # Takes into account off-diagonals (Top right to bottom left)
+        for i in range(self.s - 1, self.n):
+            for j in range(0, (self.n + 1) - self.s):
+                lineWinTRBL = False
+                if self.current_state[i][j] == '.' or self.current_state[i][j] == '*':
+                    continue
+                for s in range(0, self.s - 1):  # check for 1 less than winning size
+                    if self.current_state[i - s][j + s] != self.current_state[i - s - 1][j + s + 1]:  # this gives the TRBL diagonal
+                        lineWinTRBL = True
+                        break  # Leave for loop when lineWinTRBL is true
+                if lineWinTRBL:
+                    continue
+                return self.current_state[i][j]  # TRBL diagonal win with [i][j]
+
+        # Is whole board full?
+        for i in range(self.n):
+            for j in range(0, self.n):
+                # There's an empty field, we continue the game
+                if self.current_state[i][j] == '.':
+                    return None
+        # It's a tie!
+        return '.'
+
+    def check_end(self):
+        self.result = self.is_end()
+        # Printing the appropriate message if the game has ended
+        if self.result != None:
+            if self.result == 'X':
+                self.winner = 'X'
+                print('The winner is X!')
+                # fromm Mateen's code self.winning_e = self.heuristics[0]
+                self.file.write('\nThe winner is X!\n')
+            elif self.result == 'O':
+                self.winner = 'O'
+                print('The winner is O!')
+                self.file.write('\nThe winner is O!\n')
+            elif self.result == '.':
+                self.winner = 'tie'
+                print("It's a tie!")
+                self.file.write("\nIt's a tie!\n")
+
+            # formatting for gameTrace file.
+            self.file.write(F'i\tAverage evaluation time: {round(np.array(self.listOfTimes).mean(), 3)}s\n')
+            self.file.write(F'ii\tTotal heuristic evaluations: {self.heuTotal}\n')
+            self.file.write(F'iii\tEvaluations by depth: {self.bothDepth}\n')
+            self.file.write(F'iv\tAverage evaluation depth: {round(self.AVGStates / self.numberOfMoves, 3)}\n')
+            self.file.write(F'v\tAverage recursion depth: {round((self.AVGStates / self.numberOfMoves) / 2, 3)}\n')
+            self.file.write(F'vi\tTotal number of moves: {self.numberOfMoves}\n')
+
+            self.initialize_game()
+        return self.result
+
+    def input_move(self):
+        while True:
+            print(F'Player {self.player_turn}, enter your move:')
+            px = int(input(
+                'enter the x coordinate: '))  # >>px = input('enter the x coordinate: ') newline >>px = ord(px) - 65
+            py = int(input('enter the y coordinate: '))
+
+            if self.is_valid(px, py):
+                return (px, py)
+            else:
+                print('The move is not valid! Try again.')
+
+    def switch_player(self):
+        if self.player_turn == 'X':
+            self.player_turn = 'O'
+        elif self.player_turn == 'O':
+            self.player_turn = 'X'
+        return self.player_turn
+
+    def minimax(self, max=False, depth=0):
+        # Minimizing for 'X' and maximizing for 'O'
+        # Possible values are:
+        # -inf - win for 'X'
+        # 0  - a tie
+        # inf  - loss for 'X'
+        # We're initially setting it to large positive and negative numbers as worse than the worst case:
+
+        minimaxTimer = time.time()
+        self.currentTime = round(minimaxTimer - self.minimaxStart, 7)
+        if self.TimeUp:
+            return (0, 0, 0)
+        value = 10000000
+        if max:
+            value = -10000000
+        x = None
+        y = None
+        result = self.is_end()
+        if result == 'X':
+            return (-1000000, x, y)
+        elif result == 'O':
+            return (1000000, x, y)
+        elif result == '.':
+            return (0, x, y)
+
+        # ********************************************
+        # loop through the entire matrix
+        for i in range(0, self.n):  # range 0 to self.n will ensure we can
+            for j in range(0, self.n):  # go for the whole board size
+                # if currentTime is greater than the time t then
+                # the time is up we return (0,0,0)
+                if self.currentTime >= self.t != 0:
+                    self.TimeUp = True
+                    return (0, 0, 0)
+                # if depth is 0 we have no empty cells left to play
+                if depth == 0:
+                    return (value, x, y)
+                if self.current_state[i][j] == '.':
+                    if max:
+                        self.current_state[i][j] = 'O'
+                        if depth == self.d2:
+                            x = i
+                            y = j
+                        # update depth of adversarial search for player2 with O
+                        self.current2 += 1
+                        # Moves deeper
+                        (v, _, _) = self.minimax(max=False, depth=depth - 1)
+                        if v > value:
+                            value = v
+                            x = i
+                            y = j
+                    else:
+                        self.current_state[i][j] = 'X'
+                        if depth == self.d1:
+                            x = i
+                            y = j
+                        # update depth of adversarial search for player1 with X
+                        self.current1 += 1
+
+                        (v, _, _) = self.minimax(max=True, depth=depth - 1)
+                        if v < value:
+                            value = v
+                            x = i
+                            y = j
+                    self.current_state[i][j] = '.'
+        return (value, x, y)
+
+    def alphabeta(self, alpha=-2, beta=2, max=False, heuristic=None, depth=0):
+        # Minimizing for 'X' and maximizing for 'O'
+        # Possible values are:
+        # -inf - win for 'X'
+        # 0  - a tie
+        # inf  - loss for 'X'
+        # We're initially setting it to inf++  or -inf-- as worse than the worst case:
+
+        alphabetaTimer = time.time()
+        self.currentTime = round(alphabetaTimer - self.alphabetaStart, 7)
+        if self.TimeUp:
+            return (0, 0, 0)
+
+        # max is true and the board still has spaces for player 2 we add
+        # the depth to the list
+        if max and self.current2 != 0:
+            depthList = {depth: self.current2}
+            # If we want to maximize, then we're looking at D2 because O maximizes
+            self.depthD2.update(depthList)
+        elif self.current1 != 0:
+            depthList = {depth: self.current1}
+            # If we want to minimize, then we're looking at D1 because X minimizes
+            self.depthD1.update(depthList)
+
+        value = 10000000
+        if max:
+            value = -10000000
+        x = None
+        y = None
+
+        result = self.is_end()
+        if result == 'X':
+            return (-1, x, y)
+        elif result == 'O':
+            return (1, x, y)
+        elif result == '.':
+            return (0, x, y)
+
+        # loop through whole matrix from 0 to board size
+        for i in range(0, self.n):
+            for j in range(0, self.n):
+                # if currentTime is greater than the time t then
+                # the time is up we return (0,0,0)
+                if self.currentTime >= self.t != 0:
+                    self.TimeUp = True
+                    return (0, 0, 0)
+                # if depth is 0 we have no empty cells left to play
+                if depth == 0:
+                    return (value, x, y)
+
+                if self.current_state[i][j] == '.':
+                    if heuristic == self.E1:
+                        value = self.e1(x=i, y=j)
+                    elif heuristic == self.E2:
+                        value = self.e2(x=i, y=j)
+                    if max:
+                        self.current_state[i][j] = 'O'
+                        self.current2 += 1
+                        (v, k, l) = self.alphabeta(alpha, beta, max=False, heuristic=heuristic, depth=depth - 1)
+                        # goes back up recursion ladder and chooses another possibility
+                        if v > value and k is not None and l is not None:
+                            value = v  # best possible child
+                            x = k
+                            y = l
+                        else:  # goes backwards and chooses another option
+                            x = i
+                            y = j
+                    else:
+                        self.current_state[i][j] = 'X'
+                        self.current1 += 1
+                        (v, k, l) = self.alphabeta(alpha, beta, max=True, heuristic=heuristic, depth=depth - 1)
+                        # goes back up the recursion ladder and chooses another possibility
+                        if v < value and k is not None and l is not None:
+                            value = v  # best possible child
+                            x = k
+                            y = l
+                        else:  # compare with another possibility up the recursion ladder
+                            x = i
+                            y = j
+                    # as in skeleton example
+                    self.current_state[i][j] = '.'
+                    if max:
+                        if value >= beta:
+                            return (value, x, y)
+                        if value > alpha:
+                            alpha = value
+                    else:
+                        if value <= alpha:
+                            return (value, x, y)
+                        if value < beta:
+                            beta = value
+        return (value, x, y)
+
+    def e1(self, x, y):
+        self.e1count += 1
+        self.heuTotal += 1
+        symbol = self.current_state[x][y]
+        score = 0
+        if symbol == 'O':  # maximize for O
+            if x > 0:  # check the left
+                if self.current_state[x - 1][y] == symbol:
+                    score += 1
+                else:
+                    score += 0  # nothing changes
+                if y > 0:
+                    if self.current_state[x - 1][y - 1] == symbol:
+                        score += 1
+                    else:
+                        score += 0
+                if y < self.n - 1:
+                    if self.current_state[x - 1][y + 1] == symbol:
+                        score += 1
+                    else:
+                        score += 0
+            if x < self.n - 1:  # check the right side
+                if self.current_state[x + 1][y] == symbol:
+                    score += 1
+                else:
+                    score += 0
+                if y > 0:
+                    if self.current_state[x + 1][y - 1] == symbol:
+                        score += 1
+                    else:
+                        score += 0
+                if y < self.n - 1:
+                    if self.current_state[x + 1][y + 1] == symbol:
+                        score += 1
+                    else:
+                        score += 0
+
+            if self.current_state[x][y] == symbol:
+                score += 1
+            else:
+                score += 0
+            if y > 0:
+                score += 1 if self.current_state[x][y - 1] == symbol else 0
+            if y < self.n - 1:
+                score += 1 if self.current_state[x][y + 1] == symbol else 0
+        elif score == 'X':  # minimize for X
+            if x > 0:  # left boarder
+                score -= 1 if self.current_state[x - 1][y] == symbol else 0
+                if y > 0:
+                    score -= 1 if self.current_state[x - 1][y - 1] == symbol else 0
+                if y < self.n - 1:
+                    score -= 1 if self.current_state[x - 1][y + 1] == symbol else 0
+
+            if x < self.n - 1:  # right boarder
+                score -= 1 if self.current_state[x + 1][y] == symbol else 0
+                if y > 0:
+                    score -= 1 if self.current_state[x + 1][y - 1] == symbol else 0
+                if y < self.n - 1:
+                    score -= 1 if self.current_state[x + 1][y + 1] == symbol else 0
+
+            score -= 1 if self.current_state[x][y] == symbol else 0
+            if y > 0:
+                score -= 1 if self.current_state[x][y - 1] == symbol else 0
+            if y < self.n - 1:
+                score -= 1 if self.current_state[x][y + 1] == symbol else 0
+        return score
+
+    def e2(self, x, y):
+        self.e2count += 1
+        self.heuTotal += 1
+        score = 0
+        xcount = 0
+        ocount = 0
+        # Vertical
+        for i in range(0, self.n):
+            column = [item[i] for item in self.current_state]
+            column_string = "".join(str(x) for x in column)
+            xcount = column_string.count("X")
+            ocount = column_string.count("O")
+            if (ocount > xcount):  # maximise for O
+                score += pow(10, xcount)
+            if (xcount > ocount):  # minimise for X
+                score -= pow(10, ocount)
+            if (ocount == xcount and ocount != 0):
+                score += pow(10, ocount)
+            xcount = 0
+            ocount = 0
+        # Horizontal
+        for i in range(0, self.n):
+            row_string = "".join(str(x) for x in self.current_state[i])
+            xcount = row_string.count("X")
+            ocount = row_string.count("O")
+            if ocount > xcount:
+                score += pow(10, ocount)
+            if xcount > ocount:
+                score -= pow(10, xcount)
+            if ocount == xcount and ocount != 0:
+                score += pow(10, ocount)
+            ocount = 0
+            xcount = 0
+        # Diagonal
+        matrix = np.array(self.current_state)
+        diags = [matrix[::-1, :].diagonal(i) for i in range(-matrix.shape[0] + 1, matrix.shape[1])]
+        diags.extend(matrix.diagonal(i) for i in range(matrix.shape[1] - 1, -matrix.shape[0], -1))
+
+        for y in diags:
+            row_string = "".join(str(x) for x in y.tolist())
+            xcount = row_string.count("X")
+            ocount = row_string.count("O")
+            if ocount > xcount and len(y.tolist()) >= self.s:
+                score += pow(10, ocount)
+            if (xcount > ocount and len(y.tolist()) >= self.s):
+                score -= pow(10, xcount)
+            if (ocount == xcount and len(y.tolist()) >= self.s and ocount != 0):
+                score += pow(10, ocount)
+            ocount = 0
+            xcount = 0
+        return score
+
+    def play(self, algo=None, player_x=None, player_o=None, heuristic_x=None, heuristic_o=None):
+        # Game traces are meant to show the evolution of a single game
+        # where both players are controlled by an AI
+
+        if player_x != self.HUMAN:
+            self.file.write(F'Player 1: AI d={self.d1} a={"True" if algo is not None else "False"} '
+                            F'{"Type=ALPHABETA" if algo == self.ALPHABETA else "Type=MINIMAX"}'
+                            F'{" e1(regular)" if heuristic_x == self.E1 else " e2(defensive)"}\n')
+        if player_o != self.HUMAN:
+            self.file.write(F'Player 2: AI d={self.d2} a={"True" if algo is not None else "False"} '
+                            F'{"Type=ALPHABETA" if algo == self.ALPHABETA else "Type=MINIMAX"}'
+                            F'{" e1(regular)" if heuristic_x == self.E1 else " e2(defensive)"}\n')
+
+        if algo == None:
+            algo = self.ALPHABETA
+        if heuristic_x == None:
+            heuristic_x = self.E1
+        if heuristic_o == None:
+            heuristic_o = self.E2
+        if player_x == None:
+            player_x = self.HUMAN
+        if player_o == None:
+            player_o = self.HUMAN
+
+        while True:
+            self.draw_board()
+            if self.check_end():
+                return
+
+            # reinitialise time and depths for each player
+            self.current1 = 0
+            self.current2 = 0
+            self.currentTime = 0.0
+            self.minimaxStart = 0.0
+            self.alphabetaStart = 0.0
+            self.e1count = 0
+            self.e2count = 0
+
+            if (self.player_turn == 'X' and player_x == self.HUMAN) or (
+                    self.player_turn == 'O' and player_o == self.HUMAN):
+                (x, y) = self.input_move()
+                self.file.write(F'Player {self.player_turn} under HUMAN control plays: {chr(x + 65)} {y}\n')
+            if (self.player_turn == 'X' and player_x == self.AI) or (self.player_turn == 'O' and player_o == self.AI):
+                start = time.time()
+                if algo == self.MINIMAX:
+                    self.minimaxStart = time.time()
+                    if self.player_turn == 'X':
+                        (_, x, y) = self.minimax(max=False, depth=self.d1)
+                    else:
+                        (_, x, y) = self.minimax(max=True, depth=self.d2)
+                else:  # this evaluates if algo is self.ALPHABETA
+                    self.alphabetaStart = time.time()
+                    if self.player_turn == 'X':
+                        (m, x, y) = self.alphabeta(max=False, heuristic=heuristic_x, depth=self.d1)
+                    else:
+                        (m, x, y) = self.alphabeta(max=True, heuristic=heuristic_o, depth=self.d2)
+                end = time.time()
+                if self.TimeUp:
+                    print(F'\nPlayer {self.player_turn} under AI control has taken too long to decide.'
+                          F'\nPlayer {self.switch_player()} has won!')
+                    self.file.write(F'\nPlayer {self.player_turn} under AI control has taken too long to decide.'
+                                    F'\nPlayer {self.switch_player()} has won!')
+                    break
+                print(
+                    "States checked for P1: " + str(self.current1) + " || States checked for P2: " + str(self.current2))
+                self.listOfTimes.append(round(end - start, 7))
+                print(F'Evaluation time: {round(end - start, 7)}s')
+                print(F'Player {self.player_turn} under AI control plays: x = {x}, y = {y}')
+                self.file.write(F'\nPlayer {self.player_turn} under AI control plays:  {chr(x + 65)} {y}\n\n')
+                self.file.write(
+                    F'i Evaluation time: {round(end - start, 7)}s\n')
+                if self.player_turn == 'X':
+                    self.file.write(
+                        F'ii Heuristic evaluations: {self.e1count if heuristic_x == self.E1 else self.e2count}\n')
+                    self.file.write(F'iii Evaluations by depth: {dict(sorted(self.depthD1.items()))}\n')
+                    self.file.write(
+                        F'iv Average evaluation depth: {round(np.array(list(self.depthD1.keys())).mean(), 3)}\n')
+                    self.AVGStates += round(np.array(list(self.depthD1.keys())).mean(), 3)
+                    for key, value in self.depthD1.items():
+                        if key not in self.bothDepth:
+                            self.bothDepth[key] = value
+                        else:
+                            self.bothDepth[key] += value
+
+                else:
+                    self.file.write(
+                        F'ii Heuristic evaluations: {self.e1count if heuristic_o == self.E1 else self.e2count}\n')
+                    self.file.write(F'iii Evaluations by depth: {dict(sorted(self.depthD2.items()))}\n')
+                    self.file.write(
+                        F'iv Average evaluation depth: {round(np.array(list(self.depthD2.keys())).mean(), 3)}\n')
+                    self.AVGStates += round(np.array(list(self.depthD2.keys())).mean(),
+                                            3)  # changed from d1 in original to d2 here
+                    for key, value in self.depthD2.items():
+                        if key not in self.bothDepth:
+                            self.bothDepth[key] = value
+                        else:
+                            self.bothDepth[key] += value
+
+            self.current_state[x][y] = self.player_turn
+            self.numberOfMoves += 1
+            self.switch_player()
+
+
+def main():
+    def scorerFunc(algo=None, n=3, b=0, bboard=[], s=3, d1=0, d2=0, t=0.0, r=1):
+        e1score = 0  # number fo states evaluated by e1
+        e2score = 0  #number of states evaluated by e2
+        avgEvalTime = 0
+        totalHeurEval = 0
+        depthList = {}
+        ad = 0    #average depth evaluated by the heuristic may not be able to search all at d
+        ard = 0 #average recursion depth
+        averageMoves = 0
+
+        # Create game
+        g = Game(n=n, b=b, bboard=bboard, s=s, d1=d1, d2=d2, t=t)
+        # Play game with both AI players where player x is using heuristic e1
+        # and player o is using heuristic e2
+        for i in range(r):
+            g.play(algo=algo, player_x=Game.AI, player_o=Game.AI, heuristic_x=Game.E1, heuristic_o=Game.E2)
+            if g.winner == 'X':
+                e1score += 1
+            elif g.winner == 'O':
+                e2score += 1
+            avgEvalTime += round(np.array(g.listOfTimes).mean(),3)
+            totalHeurEval += g.heuTotal
+            depthList.update(g.bothDepth)
+            if g.numberOfMoves is not 0:
+                ad += round(g.AVGStates/g.numberOfMoves, 3)
+            ard += 0
+            averageMoves += g.numberOfMoves
+        # Play game with both AI players where player x is using heuristic e2
+        # and player o is using heuristic e1
+        for i in range(r):
+            g.play(algo=algo, player_x=Game.AI, player_o=Game.AI, heuristic_x=Game.E2, heuristic_o=Game.E1)
+            if g.winner == 'X':
+                e2score += 1
+            elif g.winner == 'O':
+                e1score += 1
+            avgEvalTime += round(np.array(g.listOfTimes).mean(),3)
+            totalHeurEval += g.heuTotal
+            depthList.update(g.bothDepth)
+            if g.numberOfMoves is not 0:
+                ad += round(g.AVGStates/g.numberOfMoves, 3)
+            ard += 0
+            averageMoves += g.numberOfMoves
+
+        avgEvalTime = avgEvalTime / (2*r)
+        totalHeurEval = totalHeurEval / (2*r)
+        ad = ad / (2*r)
+        averageMoves = averageMoves / (2*r)
+
+        for key, value in depthList.items():
+            depthList[key] = value/(2*r)
+
+
+        # Game Parameters
+        file = open('scoreboard.txt', 'a')
+        file.write(F'n={g.n} b={g.b} s={g.s} t={g.t}\n')
+
+        # Player Parameters
+        file.write(F'Player 1: d={g.d1} a={"True" if algo else "False"}\n')
+        file.write(F'Player 2: d={g.d2} a={"True" if algo else "False"}\n')
+
+        # Number of Games Played
+        file.write(F'{2*r} games\n')
+
+        # The number and percentage of wins for heuristic e1 and for heuristic e2
+        file.write(F'Total wins for heuristic e1: {e1score} ({e1score/(2*r) *100}%) (Simple)\n')
+        file.write(F'Total wins for heuristic e2: {e2score} ({e2score/(2*r) *100}%) (Complex)\n')
+
+        # All the information displayed at the end of a game (see Section 2.5.1), but averaged over 2×s games
+        file.write(F'i\tAverage evaluation time: {round(avgEvalTime,3)}s\n')
+        file.write(F'ii\tTotal heuristic evaluations: {totalHeurEval}\n')
+        file.write(F'iii\tEvaluations by depth: {depthList}\n')  # The average of the per-move average depth of the heuristic evaluation in the tree – i.e. the average of number of states evaluated at each depth
+        file.write(F'iv\tAverage evaluation depth: {round(ad,3)}\n')  # The total number of states evaluated at each depth during the entire game
+        file.write(F'v\tAverage recursion depth: {round(ad/2,3)}\n')
+        file.write(F'vi\tAverage moves per game: {averageMoves}\n\n')
+    #have to use 3 here so that we dont get out of bounds
+    #scorerFunc(algo=Game.MINIMAX, n=4, b=4, bboard=[[0,0], [0,3], [3,0], [3,3]], s=3, d1=6, d2=6, t=5, r=5)
+    #scorerFunc(algo=Game.ALPHABETA, n=4, b=4, bboard=[[0,0], [0,3], [3,0], [3,3]], s=3, d1=6, d2=6, t=1, r=5)
+    #scorerFunc(algo=Game.ALPHABETA, n=5, b=4, bboard=[], s=4, d1=2, d2=6, t=1, r=5)
+    #scorerFunc(algo=Game.ALPHABETA, n=5, b=4, bboard=[], s=4, d1=6, d2=6, t=5, r=5)
+    #scorerFunc(algo=Game.ALPHABETA, n=8, b=5, bboard=[], s=5, d1=2, d2=6, t=1, r=5)
+    #scorerFunc(algo=Game.ALPHABETA, n=8, b=5, bboard=[], s=5, d1=2, d2=6, t=5, r=5)
+    #scorerFunc(algo=Game.ALPHABETA, n=8, b=6, bboard=[], s=5, d1=6, d2=6, t=1, r=5)
+    scorerFunc(algo=Game.ALPHABETA, n=8, b=6, bboard=[], s=5, d1=6, d2=6, t=5, r=5)
+
+
+if __name__ == "__main__":
+    main()

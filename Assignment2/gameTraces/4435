@@ -1,0 +1,114 @@
+n=4 b=4 s=3 t=5
+blocs=[[0, 0], [0, 3], [3, 0], [3, 3]]
+
+Player 1: AI d=6 a=True Type=MINIMAX e1(regular)
+Player 2: AI d=6 a=True Type=MINIMAX e1(regular)
+
+	 A  B  C  D 
+ 0 | * . . * 
+ 1 | . . . . 
+ 2 | . . . . 
+ 3 | * . . * 
+
+
+Player O under AI control has taken too long to decide.
+Player X has won!Player 1: AI d=6 a=True Type=MINIMAX e1(regular)
+Player 2: AI d=6 a=True Type=MINIMAX e1(regular)
+
+	 A  B  C  D 
+ 0 | * . . * 
+ 1 | . . . . 
+ 2 | . . . . 
+ 3 | * . . * 
+
+
+Player O under AI control has taken too long to decide.
+Player X has won!Player 1: AI d=6 a=True Type=MINIMAX e1(regular)
+Player 2: AI d=6 a=True Type=MINIMAX e1(regular)
+
+	 A  B  C  D 
+ 0 | * . . * 
+ 1 | . . . . 
+ 2 | . . . . 
+ 3 | * . . * 
+
+
+Player O under AI control has taken too long to decide.
+Player X has won!Player 1: AI d=6 a=True Type=MINIMAX e1(regular)
+Player 2: AI d=6 a=True Type=MINIMAX e1(regular)
+
+	 A  B  C  D 
+ 0 | * . . * 
+ 1 | . . . . 
+ 2 | . . . . 
+ 3 | * . . * 
+
+
+Player O under AI control has taken too long to decide.
+Player X has won!Player 1: AI d=6 a=True Type=MINIMAX e1(regular)
+Player 2: AI d=6 a=True Type=MINIMAX e1(regular)
+
+	 A  B  C  D 
+ 0 | * . . * 
+ 1 | . . . . 
+ 2 | . . . . 
+ 3 | * . . * 
+
+
+Player O under AI control has taken too long to decide.
+Player X has won!Player 1: AI d=6 a=True Type=MINIMAX e2(defensive)
+Player 2: AI d=6 a=True Type=MINIMAX e2(defensive)
+
+	 A  B  C  D 
+ 0 | * . . * 
+ 1 | . . . . 
+ 2 | . . . . 
+ 3 | * . . * 
+
+
+Player O under AI control has taken too long to decide.
+Player X has won!Player 1: AI d=6 a=True Type=MINIMAX e2(defensive)
+Player 2: AI d=6 a=True Type=MINIMAX e2(defensive)
+
+	 A  B  C  D 
+ 0 | * . . * 
+ 1 | . . . . 
+ 2 | . . . . 
+ 3 | * . . * 
+
+
+Player O under AI control has taken too long to decide.
+Player X has won!Player 1: AI d=6 a=True Type=MINIMAX e2(defensive)
+Player 2: AI d=6 a=True Type=MINIMAX e2(defensive)
+
+	 A  B  C  D 
+ 0 | * . . * 
+ 1 | . . . . 
+ 2 | . . . . 
+ 3 | * . . * 
+
+
+Player O under AI control has taken too long to decide.
+Player X has won!Player 1: AI d=6 a=True Type=MINIMAX e2(defensive)
+Player 2: AI d=6 a=True Type=MINIMAX e2(defensive)
+
+	 A  B  C  D 
+ 0 | * . . * 
+ 1 | . . . . 
+ 2 | . . . . 
+ 3 | * . . * 
+
+
+Player O under AI control has taken too long to decide.
+Player X has won!Player 1: AI d=6 a=True Type=MINIMAX e2(defensive)
+Player 2: AI d=6 a=True Type=MINIMAX e2(defensive)
+
+	 A  B  C  D 
+ 0 | * . . * 
+ 1 | . . . . 
+ 2 | . . . . 
+ 3 | * . . * 
+
+
+Player O under AI control has taken too long to decide.
+Player X has won!

@@ -35,11 +35,11 @@ class Game:
         self.e2count = 0
         self.numberOfMoves = 0  # maybe change this name
         # and these below
-        self.heuTOTAL = 0
+        self.heuTotal = 0
         self.AVGStates = 0.0
         self.depthD1 = {}
         self.depthD2 = {}
-        self.dictTOTALbyDepth = {}
+        self.bothDepth = {}
         self.listOfTimes = []
 
         self.file = open(F'gameTrace-{self.n}{self.b}{self.s}{self.t}.txt', 'w')
@@ -129,8 +129,7 @@ class Game:
                 if self.current_state[i][j] == '.' or self.current_state[i][i + j] == '*':
                     continue
                 for s in range(0, self.s - 1):  # check for 1 less than the winning size
-                    if self.current_state[i + s][j + s] != self.current_state[i + s + 1][
-                        j + s + 1]:  # not equal to next element diagonally
+                    if self.current_state[i + s][j + s] != self.current_state[i + s + 1][j + s + 1]:  # not equal to next element diagonally
                         lineWinTLBR = True
                         break  # break when lineWinTLBR is true
                 if lineWinTLBR:
@@ -145,8 +144,7 @@ class Game:
                 if self.current_state[i][j] == '.' or self.current_state[i][j] == '*':
                     continue
                 for s in range(0, self.s - 1):  # check for 1 less than winning size
-                    if self.current_state[i - s][j + s] != self.current_state[i - s - 1][
-                        j + s + 1]:  # this gives the TRBL diagonal
+                    if self.current_state[i - s][j + s] != self.current_state[i - s - 1][j + s + 1]:  # this gives the TRBL diagonal
                         lineWinTRBL = True
                         break  # Leave for loop when lineWinTRBL is true
                 if lineWinTRBL:
@@ -182,8 +180,8 @@ class Game:
 
             # formatting for gameTrace file.
             self.file.write(F'i\tAverage evaluation time: {round(np.array(self.listOfTimes).mean(), 3)}s\n')
-            self.file.write(F'ii\tTotal heuristic evaluations: {self.heuTOTAL}\n')
-            self.file.write(F'iii\tEvaluations by depth: {self.dictTOTALbyDepth}\n')
+            self.file.write(F'ii\tTotal heuristic evaluations: {self.heuTotal}\n')
+            self.file.write(F'iii\tEvaluations by depth: {self.bothDepth}\n')
             self.file.write(F'iv\tAverage evaluation depth: {round(self.AVGStates / self.numberOfMoves, 3)}\n')
             self.file.write(F'v\tAverage recursion depth: {round((self.AVGStates / self.numberOfMoves) / 2, 3)}\n')
             self.file.write(F'vi\tTotal number of moves: {self.numberOfMoves}\n')
@@ -197,13 +195,7 @@ class Game:
             px = int(input(
                 'enter the x coordinate: '))  # >>px = input('enter the x coordinate: ') newline >>px = ord(px) - 65
             py = int(input('enter the y coordinate: '))
-            """
-            if px in self.colLabels:    ###
-                px = self.colLabels[px] ###not sure what this does
-            else:                       ###
-                print('The move is not valid! Try again.') ###
-                continue 
-                """
+
             if self.is_valid(px, py):
                 return (px, py)
             else:
@@ -378,7 +370,7 @@ class Game:
 
     def e1(self, x, y):
         self.e1count += 1
-        self.heuTOTAL += 1
+        self.heuTotal += 1
         symbol = self.current_state[x][y]
         score = 0
         if symbol == 'O':  # maximize for O
@@ -445,7 +437,7 @@ class Game:
 
     def e2(self, x, y):
         self.e2count += 1
-        self.heuTOTAL += 1
+        self.heuTotal += 1
         score = 0
         xcount = 0
         ocount = 0
@@ -498,25 +490,12 @@ class Game:
     def play(self, algo=None, player_x=None, player_o=None, heuristic_x=None, heuristic_o=None):
         # Game traces are meant to show the evolution of a single game
         # where both players are controlled by an AI
-        """
+
         if player_x != self.HUMAN:
             self.file.write(F'Player 1: AI d={self.d1} a={"True" if algo is not None else "False"} '
                             F'{"Type=ALPHABETA" if algo == self.ALPHABETA else "Type=MINIMAX"}'
                             F'{" e1(regular)" if heuristic_x == self.E1 else " e2(defensive)"}\n')
         if player_o != self.HUMAN:
-            self.file.write(F'Player 2: AI d={self.d2} a={"True" if algo is not None else "False"} '
-                            F'{"Type=ALPHABETA" if algo == self.ALPHABETA else "Type=MINIMAX"}'
-                            F'{" e1(regular)" if heuristic_x == self.E1 else " e2(defensive)"}\n')
-        """
-        if player_x == self.HUMAN:
-            self.file.write(F'Player 1: HUMAN\n')
-        else:
-            self.file.write(F'Player 1: AI d={self.d1} a={"True" if algo is not None else "False"} '
-                            F'{"Type=ALPHABETA" if algo == self.ALPHABETA else "Type=MINIMAX"}'
-                            F'{" e1(regular)" if heuristic_x == self.E1 else " e2(defensive)"}\n')
-        if player_o == self.HUMAN:
-            self.file.write(F'Player 2: HUMAN')
-        else:
             self.file.write(F'Player 2: AI d={self.d2} a={"True" if algo is not None else "False"} '
                             F'{"Type=ALPHABETA" if algo == self.ALPHABETA else "Type=MINIMAX"}'
                             F'{" e1(regular)" if heuristic_x == self.E1 else " e2(defensive)"}\n')
@@ -587,10 +566,10 @@ class Game:
                         F'iv Average evaluation depth: {round(np.array(list(self.depthD1.keys())).mean(), 3)}\n')
                     self.AVGStates += round(np.array(list(self.depthD1.keys())).mean(), 3)
                     for key, value in self.depthD1.items():
-                        if key not in self.dictTOTALbyDepth:
-                            self.dictTOTALbyDepth[key] = value
+                        if key not in self.bothDepth:
+                            self.bothDepth[key] = value
                         else:
-                            self.dictTOTALbyDepth[key] += value
+                            self.bothDepth[key] += value
 
                 else:
                     self.file.write(
@@ -601,10 +580,10 @@ class Game:
                     self.AVGStates += round(np.array(list(self.depthD2.keys())).mean(),
                                             3)  # changed from d1 in original to d2 here
                     for key, value in self.depthD2.items():
-                        if key not in self.dictTOTALbyDepth:
-                            self.dictTOTALbyDepth[key] = value
+                        if key not in self.bothDepth:
+                            self.bothDepth[key] = value
                         else:
-                            self.dictTOTALbyDepth[key] += value
+                            self.bothDepth[key] += value
 
             self.current_state[x][y] = self.player_turn
             self.numberOfMoves += 1
@@ -612,54 +591,57 @@ class Game:
 
 
 def main():
-    def scoreboardAppender(algo=None, n=3, b=0, bboard=[], s=3, d1=0, d2=0, t=0.0, r=1):
-        winsE1 = 0
-        winsE2 = 0
+    def scorerFunc(algo=None, n=3, b=0, bboard=[], s=3, d1=0, d2=0, t=0.0, r=1):
+        e1score = 0  # number fo states evaluated by e1
+        e2score = 0  #number of states evaluated by e2
         avgEvalTime = 0
         totalHeurEval = 0
-        evalByDepth = {}
-        avgEvalDepth = 0
-        avgRecDepth = 0
-        avgMovesPerGame = 0
+        depthList = {}
+        ad = 0    #average depth evaluated by the heuristic may not be able to search all at d
+        ard = 0 #average recursion depth
+        averageMoves = 0
 
-        # Create game using args
+        # Create game
         g = Game(n=n, b=b, bboard=bboard, s=s, d1=d1, d2=d2, t=t)
-        # Play 1xr games with X E1 O E2
+        # Play game with both AI players where player x is using heuristic e1
+        # and player o is using heuristic e2
         for i in range(r):
             g.play(algo=algo, player_x=Game.AI, player_o=Game.AI, heuristic_x=Game.E1, heuristic_o=Game.E2)
             if g.winner == 'X':
-                winsE1 += 1
+                e1score += 1
             elif g.winner == 'O':
-                winsE2 += 1
-            avgEvalTime += round(np.array(g.listOfTimes).mean(), 3)
-            totalHeurEval += g.heuTOTAL
-            evalByDepth.update(g.dictTOTALbyDepth)
+                e2score += 1
+            avgEvalTime += round(np.array(g.listOfTimes).mean(),3)
+            totalHeurEval += g.heuTotal
+            depthList.update(g.bothDepth)
             if g.numberOfMoves is not 0:
-                avgEvalDepth += round(g.AVGStates / g.numberOfMoves, 3)
-            avgRecDepth += 0
-            avgMovesPerGame += g.numberOfMoves
-        # Play 1xr games with O E1 X E2
+                ad += round(g.AVGStates/g.numberOfMoves, 3)
+            ard += 0
+            averageMoves += g.numberOfMoves
+        # Play game with both AI players where player x is using heuristic e2
+        # and player o is using heuristic e1
         for i in range(r):
             g.play(algo=algo, player_x=Game.AI, player_o=Game.AI, heuristic_x=Game.E2, heuristic_o=Game.E1)
             if g.winner == 'X':
-                winsE2 += 1
+                e2score += 1
             elif g.winner == 'O':
-                winsE1 += 1
-            avgEvalTime += round(np.array(g.listOfTimes).mean(), 3)
-            totalHeurEval += g.heuTOTAL
-            evalByDepth.update(g.dictTOTALbyDepth)
+                e1score += 1
+            avgEvalTime += round(np.array(g.listOfTimes).mean(),3)
+            totalHeurEval += g.heuTotal
+            depthList.update(g.bothDepth)
             if g.numberOfMoves is not 0:
-                avgEvalDepth += round(g.AVGStates / g.numberOfMoves, 3)
-            avgRecDepth += 0
-            avgMovesPerGame += g.numberOfMoves
+                ad += round(g.AVGStates/g.numberOfMoves, 3)
+            ard += 0
+            averageMoves += g.numberOfMoves
 
-        avgEvalTime = avgEvalTime / (2 * r)
-        totalHeurEval = totalHeurEval / (2 * r)
-        avgEvalDepth = avgEvalDepth / (2 * r)
-        avgMovesPerGame = avgMovesPerGame / (2 * r)
+        avgEvalTime = avgEvalTime / (2*r)
+        totalHeurEval = totalHeurEval / (2*r)
+        ad = ad / (2*r)
+        averageMoves = averageMoves / (2*r)
 
-        for key, value in evalByDepth.items():
-            evalByDepth[key] = value / (2 * r)
+        for key, value in depthList.items():
+            depthList[key] = value/(2*r)
+
 
         # Game Parameters
         file = open('scoreboard.txt', 'a')
@@ -670,28 +652,28 @@ def main():
         file.write(F'Player 2: d={g.d2} a={"True" if algo else "False"}\n')
 
         # Number of Games Played
-        file.write(F'{2 * r} games\n')
+        file.write(F'{2*r} games\n')
 
         # The number and percentage of wins for heuristic e1 and for heuristic e2
-        file.write(F'Total wins for heuristic e1: {winsE1} ({winsE1 / (2 * r) * 100}%) (Simple)\n')
-        file.write(F'Total wins for heuristic e2: {winsE2} ({winsE2 / (2 * r) * 100}%) (Complex)\n')
+        file.write(F'Total wins for heuristic e1: {e1score} ({e1score/(2*r) *100}%) (Simple)\n')
+        file.write(F'Total wins for heuristic e2: {e2score} ({e2score/(2*r) *100}%) (Complex)\n')
 
         # All the information displayed at the end of a game (see Section 2.5.1), but averaged over 2×s games
-        file.write(F'i\tAverage evaluation time: {round(avgEvalTime, 3)}s\n')
+        file.write(F'i\tAverage evaluation time: {round(avgEvalTime,3)}s\n')
         file.write(F'ii\tTotal heuristic evaluations: {totalHeurEval}\n')
-        file.write(F'iii\tEvaluations by depth: {evalByDepth}\n')
-        file.write(F'iv\tAverage evaluation depth: {round(avgEvalDepth, 3)}\n')
-        file.write(F'v\tAverage recursion depth: {round(avgEvalDepth / 2, 3)}\n')
-        file.write(F'vi\tAverage moves per game: {avgMovesPerGame}\n\n')
-
-    # scoreboardAppender(algo=Game.MINIMAX, n=4, b=4, bboard=[[0,0], [0,4], [4,0], [4,4]], s=3, d1=6, d2=6, t=5, r=5)
-    # scoreboardAppender(algo=Game.ALPHABETA, n=4, b=4, bboard=[[0,0], [0,4], [4,0], [4,4]], s=3, d1=6, d2=6, t=1, r=5)
-    # scoreboardAppender(algo=Game.ALPHABETA, n=5, b=4, bboard=[], s=4, d1=2, d2=6, t=1, r=5)
-    # scoreboardAppender(algo=Game.ALPHABETA, n=5, b=4, bboard=[], s=4, d1=6, d2=6, t=5, r=5)
-    # scoreboardAppender(algo=Game.ALPHABETA, n=8, b=5, bboard=[], s=5, d1=2, d2=6, t=1, r=5)
-    # scoreboardAppender(algo=Game.ALPHABETA, n=8, b=5, bboard=[], s=5, d1=2, d2=6, t=5, r=5)
-    # scoreboardAppender(algo=Game.ALPHABETA, n=8, b=6, bboard=[], s=5, d1=6, d2=6, t=1, r=5)
-    scoreboardAppender(algo=Game.ALPHABETA, n=8, b=6, bboard=[], s=5, d1=6, d2=6, t=5, r=5)
+        file.write(F'iii\tEvaluations by depth: {depthList}\n')  # The average of the per-move average depth of the heuristic evaluation in the tree – i.e. the average of number of states evaluated at each depth
+        file.write(F'iv\tAverage evaluation depth: {round(ad,3)}\n')  # The total number of states evaluated at each depth during the entire game
+        file.write(F'v\tAverage recursion depth: {round(ad/2,3)}\n')
+        file.write(F'vi\tAverage moves per game: {averageMoves}\n\n')
+    #have to use 3 here so that we dont get out of bounds
+    #scorerFunc(algo=Game.MINIMAX, n=4, b=4, bboard=[[0,0], [0,3], [3,0], [3,3]], s=3, d1=6, d2=6, t=5, r=5)
+    #scorerFunc(algo=Game.ALPHABETA, n=4, b=4, bboard=[[0,0], [0,3], [3,0], [3,3]], s=3, d1=6, d2=6, t=1, r=5)
+    #scorerFunc(algo=Game.ALPHABETA, n=5, b=4, bboard=[], s=4, d1=2, d2=6, t=1, r=5)
+    #scorerFunc(algo=Game.ALPHABETA, n=5, b=4, bboard=[], s=4, d1=6, d2=6, t=5, r=5)
+    #scorerFunc(algo=Game.ALPHABETA, n=8, b=5, bboard=[], s=5, d1=2, d2=6, t=1, r=5)
+    #scorerFunc(algo=Game.ALPHABETA, n=8, b=5, bboard=[], s=5, d1=2, d2=6, t=5, r=5)
+    #scorerFunc(algo=Game.ALPHABETA, n=8, b=6, bboard=[], s=5, d1=6, d2=6, t=1, r=5)
+    scorerFunc(algo=Game.ALPHABETA, n=8, b=6, bboard=[], s=5, d1=6, d2=6, t=5, r=5)
 
 
 if __name__ == "__main__":

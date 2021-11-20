@@ -1,0 +1,139 @@
+n=5 b=4 s=4 t=1
+blocs=[[0, 0], [4, 3], [1, 0], [1, 2]]
+
+Player 1: AI d=2 a=True Type=ALPHABETA e1(regular)
+Player 2: AI d=6 a=True Type=ALPHABETA e1(regular)
+
+	 A  B  C  D  E 
+ 0 | * * . . . 
+ 1 | . . . . . 
+ 2 | . * . . . 
+ 3 | . . . . * 
+ 4 | . . . . . 
+
+
+Player X under AI control plays:  E 4
+
+i Evaluation time: 0.0s
+ii Heuristic evaluations: 61
+iii Evaluations by depth: {0: 21, 1: 1}
+iv Average evaluation depth: 0.5
+
+	 A  B  C  D  E 
+ 0 | * * . . . 
+ 1 | . . . . . 
+ 2 | . * . . . 
+ 3 | . . . . * 
+ 4 | . . . . X 
+
+
+Player X under AI control has taken too long to decide.
+Player O has won!Player 1: AI d=2 a=True Type=ALPHABETA e1(regular)
+Player 2: AI d=6 a=True Type=ALPHABETA e1(regular)
+
+	 A  B  C  D  E 
+ 0 | * * . . . 
+ 1 | . . . . . 
+ 2 | . * . . . 
+ 3 | . . . . * 
+ 4 | . . . . X 
+
+
+Player X under AI control has taken too long to decide.
+Player O has won!Player 1: AI d=2 a=True Type=ALPHABETA e1(regular)
+Player 2: AI d=6 a=True Type=ALPHABETA e1(regular)
+
+	 A  B  C  D  E 
+ 0 | * * . . . 
+ 1 | . . . . . 
+ 2 | . * . . . 
+ 3 | . . . . * 
+ 4 | . . . . X 
+
+
+Player X under AI control has taken too long to decide.
+Player O has won!Player 1: AI d=2 a=True Type=ALPHABETA e1(regular)
+Player 2: AI d=6 a=True Type=ALPHABETA e1(regular)
+
+	 A  B  C  D  E 
+ 0 | * * . . . 
+ 1 | . . . . . 
+ 2 | . * . . . 
+ 3 | . . . . * 
+ 4 | . . . . X 
+
+
+Player X under AI control has taken too long to decide.
+Player O has won!Player 1: AI d=2 a=True Type=ALPHABETA e1(regular)
+Player 2: AI d=6 a=True Type=ALPHABETA e1(regular)
+
+	 A  B  C  D  E 
+ 0 | * * . . . 
+ 1 | . . . . . 
+ 2 | . * . . . 
+ 3 | . . . . * 
+ 4 | . . . . X 
+
+
+Player X under AI control has taken too long to decide.
+Player O has won!Player 1: AI d=2 a=True Type=ALPHABETA e2(defensive)
+Player 2: AI d=6 a=True Type=ALPHABETA e2(defensive)
+
+	 A  B  C  D  E 
+ 0 | * * . . . 
+ 1 | . . . . . 
+ 2 | . * . . . 
+ 3 | . . . . * 
+ 4 | . . . . X 
+
+
+Player X under AI control has taken too long to decide.
+Player O has won!Player 1: AI d=2 a=True Type=ALPHABETA e2(defensive)
+Player 2: AI d=6 a=True Type=ALPHABETA e2(defensive)
+
+	 A  B  C  D  E 
+ 0 | * * . . . 
+ 1 | . . . . . 
+ 2 | . * . . . 
+ 3 | . . . . * 
+ 4 | . . . . X 
+
+
+Player X under AI control has taken too long to decide.
+Player O has won!Player 1: AI d=2 a=True Type=ALPHABETA e2(defensive)
+Player 2: AI d=6 a=True Type=ALPHABETA e2(defensive)
+
+	 A  B  C  D  E 
+ 0 | * * . . . 
+ 1 | . . . . . 
+ 2 | . * . . . 
+ 3 | . . . . * 
+ 4 | . . . . X 
+
+
+Player X under AI control has taken too long to decide.
+Player O has won!Player 1: AI d=2 a=True Type=ALPHABETA e2(defensive)
+Player 2: AI d=6 a=True Type=ALPHABETA e2(defensive)
+
+	 A  B  C  D  E 
+ 0 | * * . . . 
+ 1 | . . . . . 
+ 2 | . * . . . 
+ 3 | . . . . * 
+ 4 | . . . . X 
+
+
+Player X under AI control has taken too long to decide.
+Player O has won!Player 1: AI d=2 a=True Type=ALPHABETA e2(defensive)
+Player 2: AI d=6 a=True Type=ALPHABETA e2(defensive)
+
+	 A  B  C  D  E 
+ 0 | * * . . . 
+ 1 | . . . . . 
+ 2 | . * . . . 
+ 3 | . . . . * 
+ 4 | . . . . X 
+
+
+Player X under AI control has taken too long to decide.
+Player O has won!

@@ -553,7 +553,7 @@ class Game:
             if (self.player_turn == 'X' and player_x == self.AI) or (self.player_turn == 'O' and player_o == self.AI):
                 start = time.time()
                 if algo == self.MINIMAX:
-                    self.miniMaxStartT = time.time()
+                    self.minimaxStart = time.time()
                     if self.player_turn == 'X':
                         (_, x, y) = self.minimax(max=False, depth=self.d1)
                     else:

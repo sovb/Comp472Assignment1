@@ -1,0 +1,87 @@
+from gensim import downloader as api
+from csv import reader
+import random
+
+print("Importing")
+model = api.load("word2vec-google-news-300")
+print("Import complete")
+
+vocabSize = 0
+C = 0
+V = 0
+
+
+with open('synonyms.csv', 'r') as synonyms:
+    csvReader = reader(synonyms)
+    lineNum = 0
+    vocab = model.index_to_key
+    vocabSize = len(vocab)
+    for line in csvReader:
+        if lineNum != 0:
+            question = line[0]      # this line and next 3, extract data to use from line
+            correct = line[1]
+            fourOptions = [line[2], line[3], line[4], line[5]]
+
+            questionFound = None       #is word in the model
+            optionsFound = 0
+
+            options = []
+
+            if question in vocab:       # these lines assign value depending on if questionWord in model
+                questionFound = True
+            else:
+                questionFound = False
+
+            for option in fourOptions:
+                if option in vocab:
+                    optionsFound += 1
+                    options.append(option)
+
+            if questionFound is False or len(options) == 0:
+                # system performs random guess here
+                guessedIndex = random.randint(0,3)
+                guessWord = fourOptions[guessedIndex]   # guess one at random
+                result = question + ", " + correct + ", " + guessWord + ", guess\n"
+                file = open("word2vec-google-news-300-details.csv", "a")
+                file.write(result)
+                file.close()
+
+            elif questionFound is True and len(options) > 0:
+                scores = []
+                for option in options:
+                    scores.append(model.similarity(question, option))
+                winningIndex = scores.index(max(scores))
+                if options[winningIndex] == correct:    # for guess word check if its correct
+                    C += 1      # correct words
+                    V += 1      # words in vocab
+                    result = question + ", " + correct + ", " + options[winningIndex] + ", correct\n"
+                    file = open("word2vec-google-news-300-details.csv", "a")
+                    file.write(result)
+                    file.close()
+
+                elif options[winningIndex] != correct:
+                    V += 1
+                    result = question + ", " + correct + ", " + options[winningIndex] + ", wrong\n"
+                    file = open("word2vec-google-news-300-details.csv", "a")
+                    file.write(result)
+                    file.close()
+        lineNum += 1
+
+
+a = "\nword2vec-google-news-300"
+comma = ", "
+b = str(vocabSize)      # num of words
+c = str(C)              # correct
+d = str(V)              # size of vocab
+e = str(C/V)            # accuracy
+file = open("analysis.csv", "a")        
+file.write(a)
+file.write(comma)
+file.write(b)
+file.write(comma)
+file.write(c)
+file.write(comma)
+file.write(d)
+file.write(comma)
+file.write(e)
+file.close()
